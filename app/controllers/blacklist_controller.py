@@ -1,3 +1,4 @@
+"""Контролер чорного списку — повністю адмінський (всі ендпоінти потребують require_admin)."""
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 

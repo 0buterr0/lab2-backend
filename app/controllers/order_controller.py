@@ -1,3 +1,4 @@
+"""Контролер замовлень. Створення/оплата — клієнт; скасування — клієнт або адмін; список — обидва."""
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 

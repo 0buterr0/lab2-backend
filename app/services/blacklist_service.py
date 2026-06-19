@@ -1,3 +1,8 @@
+"""Сервіс чорного списку — реалізація вимоги варіанту 9.
+
+Адмін може занести/прибрати неплатника. Після занесення сервіс OrderService
+блокує цьому користувачу створення нових замовлень.
+"""
 import logging
 from sqlalchemy.orm import Session
 
@@ -15,14 +20,18 @@ class BlacklistService:
         self._users = UserRepository(db)
 
     def list(self) -> list[BlacklistEntry]:
+        """Усі записи чорного списку — для адмінської сторінки."""
         return list(self._repo.list())
 
     def add(self, user_id: int, reason: str = "non-payment") -> BlacklistEntry:
+        """Занести користувача в чорний список (з причиною)."""
         user = self._users.get(user_id)
         if not user:
             raise NotFoundError(f"User {user_id} not found")
+        # Захист: іншого адміна занести в чорний список не можна.
         if user.is_admin:
             raise ConflictError("Cannot blacklist an admin")
+        # Захист від дублювання запису.
         if self._repo.get_by_user(user_id):
             raise ConflictError(f"User {user_id} is already blacklisted")
         entry = BlacklistEntry(user_id=user_id, reason=reason)
@@ -32,6 +41,7 @@ class BlacklistService:
         return entry
 
     def remove(self, user_id: int) -> None:
+        """Прибрати користувача з чорного списку — він знову може робити замовлення."""
         entry = self._repo.get_by_user(user_id)
         if not entry:
             raise NotFoundError(f"User {user_id} is not blacklisted")

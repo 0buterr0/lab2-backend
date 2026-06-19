@@ -1,3 +1,4 @@
+"""Сервіс автентифікації: реєстрація + перевірка пароля + видача JWT."""
 import logging
 from sqlalchemy.orm import Session
 
@@ -11,10 +12,13 @@ log = logging.getLogger(__name__)
 
 class AuthService:
     def __init__(self, db: Session) -> None:
+        # Інкапсуляція — назовні видно тільки методи, не репозиторій.
         self._users = UserRepository(db)
 
     def register(self, *, username: str, password: str, full_name: str = "",
                  role: UserRole = UserRole.CLIENT) -> User:
+        """Створити нового користувача. Пароль зберігається лише як bcrypt-хеш."""
+        # Унікальність логіну перевіряємо явно, щоб віддати зрозумілу 409 помилку.
         if self._users.get_by_username(username):
             raise ConflictError(f"Username '{username}' already taken")
         user = User(
@@ -29,6 +33,7 @@ class AuthService:
         return user
 
     def authenticate(self, *, username: str, password: str) -> tuple[User, str]:
+        """Перевірити пару логін/пароль і видати JWT із роллю користувача в claims."""
         user = self._users.get_by_username(username)
         if not user or not verify_password(password, user.password_hash):
             log.warning("Auth failed for username=%s", username)

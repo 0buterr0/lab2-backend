@@ -1,3 +1,4 @@
+"""Контролер каталогу. Перегляд — будь-кому авторизованому, мутації — лише адміну."""
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 

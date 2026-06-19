@@ -1,3 +1,4 @@
+"""Запис у чорному списку — реалізація вимоги 'адмін може занести неплатників'."""
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..core.database import Base
@@ -8,6 +9,7 @@ class BlacklistEntry(Base, TimestampMixin):
     __tablename__ = "blacklist"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    # unique=True гарантує, що одного користувача не можна занести двічі.
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False
     )
